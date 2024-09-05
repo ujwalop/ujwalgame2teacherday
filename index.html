@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Puzzle Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #282c34;
+            color: white;
+        }
+
+        .loading-screen, .player-selection, .game-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: #282c34;
+            z-index: 10;
+        }
+
+        .loading-text {
+            font-size: 24px;
+            font-weight: bold;
+            opacity: 0;
+            animation: fadeInOut 3s ease-in-out infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .logo {
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        button, input[type="text"] {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #61dafb;
+            color: #282c34;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #21a1f1;
+        }
+
+        input[type="text"] {
+            width: 200px;
+        }
+
+        #timer {
+            font-size: 24px;
+            margin-top: 10px;
+        }
+
+        #target-box {
+            background-color: #2c2f33;
+        }
+
+        .dropzone {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100px;
+            height: 100px;
+            border: 2px dashed #888;
+            box-sizing: border-box;
+        }
+
+        .dropzone.over {
+            border-color: #61dafb;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            width: 90%;
+            margin-bottom: 20px;
+            overflow: auto;
+        }
+
+        .box {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 2px;
+            border: 2px solid #444;
+            padding: 10px;
+            background-color: #3c3f41;
+        }
+
+        .piece {
+            width: 100px;
+            height: 100px;
+            background-size: 300px 300px;
+            border: 2px solid #444;
+            cursor: grab;
+            transition: transform 0.2s;
+        }
+
+        .piece:active {
+            transform: scale(1.05);
+        }
+
+        .player-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .player-btn {
+            padding: 15px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #61dafb;
+            color: #282c34;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .player-btn:hover {
+            background-color: #21a1f1;
+        }
+
+        @media (max-width: 768px) and (orientation: landscape) {
+            .container {
+                flex-direction: row;
+                align-items: center;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .box {
+                grid-template-columns: repeat(3, 70px);
+                grid-template-rows: repeat(3, 70px);
+                gap: 5px;
+            }
+
+            .piece {
+                width: 70px;
+                height: 70px;
+                background-size: 210px 210px;
+            }
+
+            input[type="text"] {
+                width: 100%;
+            }
+
+            button {
+                width: 90%;
+                padding: 8px 16px;
+            }
+
+            #timer {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen">
+        <div class="loading-text">Game made by Ujwal Guru</div>
+    </div>
+
+    <!-- Player Selection Screen -->
+    <div class="player-selection" style="display: none;">
+        <div class="player-btns">
+            <button class="player-btn" data-player="player1">Player 1</button>
+            <button class="player-btn" data-player="player2">Player 2</button>
+            <button class="player-btn" data-player="player3">Player 3</button>
+            <button class="player-btn" data-player="player4">Player 4</button>
+            <button class="player-btn" data-player="player5">Player 5</button>
+            <button class="player-btn" data-player="player6">Player 6</button>
+            <button class="player-btn" data-player="player7">Player 7</button>
+            <button class="player-btn" data-player="player8">Player 8</button>
+            <button class="player-btn" data-player="player9">Player 9</button>
+            <button class="player-btn" data-player="player10">Player 10</button>
+            <button class="player-btn" data-player="player11">Player 11</button>
+            <button class="player-btn" data-player="player12">Player 12</button>
+            <button class="player-btn" data-player="player13">Player 13</button>
+            <button class="player-btn" data-player="player14">Player 14</button>
+            <button class="player-btn" data-player="player15">Player 15</button>
+            <button class="player-btn" data-player="player16">Player 16</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div class="game-screen" style="display: none;">
+        <img src="logo.png" alt="Game Logo" class="logo" width="200">
+        <div class="controls">
+            <button id="reset">Reset Puzzle</button>
+            <button id="undo">Undo</button>
+            <button id="redo">Redo</button>
+            <div id="timer">2:00</div>
+        </div>
+
+        <div class="container">
+            <div id="source-box" class="box"></div>
+            <div id="target-box" class="box">
+                <div class="dropzone" id="dropzone-1"></div>
+                <div class="dropzone" id="dropzone-2"></div>
+                <div class="dropzone" id="dropzone-3"></div>
+                <div class="dropzone" id="dropzone-4"></div>
+                <div class="dropzone" id="dropzone-5"></div>
+                <div class="dropzone" id="dropzone-6"></div>
+                <div class="dropzone" id="dropzone-7"></div>
+                <div class="dropzone" id="dropzone-8"></div>
+                <div class="dropzone" id="dropzone-9"></div>
+            </div>
+        </div>
+
+        <button id="submit">Submit Answer</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingScreen = document.querySelector('.loading-screen');
+            const playerSelection = document.querySelector('.player-selection');
+            const gameScreen = document.querySelector('.game-screen');
+            const sourceBox = document.getElementById('source-box');
+            const dropzones = document.querySelectorAll('.dropzone');
+            const timerDisplay = document.getElementById('timer');
+            const resetButton = document.getElementById('reset');
+            const undoButton = document.getElementById('undo');
+            const redoButton = document.getElementById('redo');
+            const submitButton = document.getElementById('submit');
+
+            const pieceImages = {
+                player1: "url('aitrex.jpg')",
+                player2: "url('player2.jpg')",
+                player3: "url('player3.jpg')",
+                player4: "url('player4.jpg')",
+                player5: "url('player5.jpg')",
+                player6: "url('player6.jpg')",
+                player7: "url('player7.jpg')",
+                player8: "url('player8.jpg')", 
+                player9: "url('player9.jpg')",
+                player10: "url('player10.jpg')",
+                player11: "url('player11.jpg')",
+                player12: "url('player12.jpg')",
+                player13: "url('player13.jpg')",
+                player14: "url('player14.jpg')",
+                player15: "url('player15.jpg')",
+                player16: "url('player16.jpg')"
+            };
+
+            let selectedPlayer = null;
+            let pieces = [];
+            let timerInterval = null;
+            let timerSeconds = 120;
+
+            // Show the player selection screen
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                playerSelection.style.display = 'flex';
+            }, 3000);
+
+            // Handle player selection
+            document.querySelectorAll('.player-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    selectedPlayer = e.target.dataset.player;
+                    setupGame();
+                });
+            });
+
+            function setupGame() {
+                if (selectedPlayer) {
+                    playerSelection.style.display = 'none';
+                    gameScreen.style.display = 'flex';
+                    loadPieces();
+                    startTimer();
+                }
+            }
+
+            function loadPieces() {
+                sourceBox.innerHTML = '';
+                dropzones.forEach(dropzone => {
+                    dropzone.innerHTML = '';
+                });
+                
+                pieces = [];
+                for (let i = 1; i <= 9; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'piece';
+                    piece.style.backgroundImage = pieceImages[selectedPlayer];
+                    piece.style.backgroundPosition = `-${(i % 3) * 100}px -${Math.floor(i / 3) * 100}px`;
+                    piece.draggable = true;
+                    piece.dataset.position = i;
+                    piece.addEventListener('dragstart', handleDragStart);
+                    piece.addEventListener('dragend', handleDragEnd);
+                    sourceBox.appendChild(piece);
+                    pieces.push(piece);
+                }
+
+                dropzones.forEach(dropzone => {
+                    dropzone.addEventListener('dragover', handleDragOver);
+                    dropzone.addEventListener('drop', handleDrop);
+                });
+            }
+
+            function handleDragStart(e) {
+                e.dataTransfer.setData('text/plain', e.target.dataset.position);
+                e.target.classList.add('dragging');
+            }
+
+            function handleDragEnd(e) {
+                e.target.classList.remove('dragging');
+            }
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.target.classList.add('over');
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                e.target.classList.remove('over');
+                const position = e.dataTransfer.getData('text/plain');
+                const piece = pieces.find(p => p.dataset.position === position);
+                if (e.target.children.length === 0) {
+                    e.target.appendChild(piece);
+                }
+            }
+
+            function startTimer() {
+                timerInterval = setInterval(() => {
+                    if (timerSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        alert('Time is up!');
+                        // Handle game over logic here
+                        return;
+                    }
+                    timerSeconds--;
+                    const minutes = Math.floor(timerSeconds / 60);
+                    const seconds = timerSeconds % 60;
+                    timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                }, 1000);
+            }
+
+            resetButton.addEventListener('click', loadPieces);
+
+            undoButton.addEventListener('click', () => {
+                // Implement undo functionality
+            });
+
+            redoButton.addEventListener('click', () => {
+                // Implement redo functionality
+            });
+
+            submitButton.addEventListener('click', () => {
+                clearInterval(timerInterval);
+                alert('Answer Submitted!');
+                // Handle submission logic here
+            });
+        });
+    </script>
+</body>
+</html>
